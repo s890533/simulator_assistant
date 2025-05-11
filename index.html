@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Simulator Assistant</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    :root {
+      --main-bg: #1a1f1a;
+      --primary: #3e5e4a;
+      --secondary: #7db87e;
+      --accent: #cc7a00;
+      --brown: #5e4a3e;
+      --text: #ffffff;
+      --card-bg: #2e332e;
+      --stop-bg: #5a5a5a;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: var(--main-bg);
+      color: var(--text);
+    }
+
+    header {
+      background-color: var(--primary);
+      padding: 1rem;
+      text-align: center;
+      font-size: 1.5rem;
+      font-weight: bold;
+    }
+
+    .section {
+      background-color: var(--card-bg);
+      margin-bottom: 1.5rem;
+      padding: 1rem;
+      border-radius: 10px;
+    }
+
+    .section h2 {
+      color: var(--secondary);
+      margin-top: 0;
+    }
+
+    .group p {
+      text-align: left;
+      font-size: 1rem;
+      display: block;
+      justify-content: unset;
+      align-items: unset;
+      height: auto;
+      margin-bottom: 0.5rem;
+    }
+
+    .horizontal-group .form-check {
+      display: inline-block;
+      margin-right: 1rem;
+    }
+
+    .start-btn {
+      background-color: var(--accent);
+      color: var(--text);
+      border: none;
+      font-size: 1.5rem;
+      font-weight: bold;
+    }
+
+    .start-btn:hover {
+      background-color: #e68a00;
+    }
+
+    .stop-btn {
+      background-color: var(--stop-bg);
+      color: var(--text);
+      border: none;
+      font-size: 1.5rem;
+      font-weight: bold;
+    }
+
+    .stop-btn:hover {
+      background-color: #777;
+    }
+
+    #page2 {
+      display: none;
+    }
+  </style>
+  <script>
+    function startSecondPage() {
+      document.getElementById('page1').style.display = 'none';
+      document.getElementById('page2').style.display = 'block';
+      showSecondPage();
+    }
+
+    let timerInterval;
+    let timeElapsed = 0;
+    let currentManuverIndex = 0;
+    let manuverList = [];
+
+    function getRandomFromArray(arr) {
+      return arr[Math.floor(Math.random() * arr.length)];
+    }
+
+    function generateManuvers(difficulty, mode) {
+      let countRange;
+      switch (difficulty) {
+        case 'easy': countRange = [2, 4]; break;
+        case 'mid': countRange = [4, 6]; break;
+        case 'hard': countRange = [6, 8]; break;
+        case 'extreme': countRange = [6, 8]; break;
+        default: countRange = [2, 4];
+      }
+      const count = Math.floor(Math.random() * (countRange[1] - countRange[0] + 1)) + countRange[0];
+      const manuvers = [];
+
+      function createSpeed() {
+        const speed = 200 + Math.floor(Math.random() * 11) * 10;
+        return `Speed ${speed} kts`;
+      }
+
+      function createTurn() {
+        const dir = getRandomFromArray(['left', 'right']);
+        const degree = 20 + Math.floor(Math.random() * 69) * 5;
+        const bank = getRandomFromArray([20, 25, 30, 35, 40, 45]);
+        return `Turn ${dir} ${degree} degrees from current HDG with ${bank} degrees bank`;
+      }
+
+      function createAltitude() {
+        const dir = getRandomFromArray(['Climb', 'Descent']);
+        const alt = 1000 + Math.floor(Math.random() * 19) * 500;
+        return `${dir} ${alt} ft from current ALT`;
+      }
+
+      for (let i = 0; i < count; i++) {
+        const rand = Math.random();
+        if ((difficulty === 'mid' || difficulty === 'hard') && rand < 0.3 && mode === 'read-and-do') {
+          const mix1 = getRandomFromArray([createSpeed, createTurn, createAltitude]);
+          let mix2;
+          do {
+            mix2 = getRandomFromArray([createSpeed, createTurn, createAltitude]);
+          } while (mix2 === mix1);
+          manuvers.push(`${mix1()} and ${mix2()}`);
+        } else if (difficulty === 'extreme' && rand < 0.4) {
+          const mixTypes = [createSpeed, createTurn, createAltitude];
+          shuffleArray(mixTypes);
+          const n = rand < 0.1 ? 3 : 2;
+          manuvers.push(mixTypes.slice(0, n).map(fn => fn()).join(' and '));
+        } else {
+          const templateType = Math.floor(Math.random() * 3);
+          if (templateType === 0) {
+            manuvers.push(createSpeed());
+          } else if (templateType === 1) {
+            manuvers.push(createTurn());
+          } else {
+            manuvers.push(createAltitude());
+          }
+        }
+      }
+      return manuvers;
+    }
+
+    function shuffleArray(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+      return array;
+    }
+
+    function showSecondPage() {
+      function generateMeth2x2() {
+        const valid = (n) => n >= 10 && !(n % 10 === 5 || n % 10 === 0);
+        let a, b;
+        do { a = Math.floor(Math.random() * 90) + 10; } while (!valid(a));
+        do { b = Math.floor(Math.random() * 90) + 10; } while (!valid(b));
+        return { question: `${a} × ${b}`, answer: a * b };
+      }
+
+      function generateMethAddSub() {
+        let a = Math.floor(Math.random() * 900) + 100;
+        let b;
+        do { b = Math.floor(Math.random() * 900) + 100; } while (a === b);
+        const op = Math.random() < 0.5 ? '+' : '-';
+        if (op === '-' && b > a) [a, b] = [b, a];
+        return { question: `${a} ${op} ${b}`, answer: op === '+' ? a + b : a - b };
+      }
+
+      function showMultiTaskQuestion(taskName) {
+        const group = document.querySelectorAll('#page2 .section')[1].querySelector('.group');
+        group.innerHTML = '';
+        const title = document.createElement('h5');
+        title.className = 'text-center';
+        let qa;
+        if (taskName === '2x2') qa = generateMeth2x2();
+        if (taskName === 'add-sub') qa = generateMethAddSub();
+        title.innerText = qa ? qa.question : 'N/A';
+        group.appendChild(title);
+      }
+      
+      const selectedTasks = Array.from(document.querySelectorAll('input[name="task"]:checked')).map(el => el.value);
+      const multitaskSection = document.querySelectorAll('#page2 .section')[1];
+      
+      if (selectedTasks.length === 0) {
+        multitaskSection.style.display = 'none';
+      } else {
+        multitaskSection.style.display = 'block';
+        const multiTaskGroup = multitaskSection.querySelector('.group');
+        multiTaskGroup.innerHTML = '';
+        const multiTimer = document.createElement('div');
+        multiTimer.className = 'text-center';
+        multiTimer.style.marginTop = '2rem';
+        multiTimer.innerHTML = '<span id="multi-timer" class="badge" style="background-color: var(--accent); font-size: 1.5rem;"></span>';
+        multiTaskGroup.appendChild(multiTimer);
+        //let multiCountdown = Math.floor(Math.random() * (200 - 30 + 1)) + 30;
+        let multiCountdown = Math.floor(Math.random() * (40 - 30 + 1)) + 30;
+        document.getElementById('multi-timer').innerText = multiCountdown;
+        const multiTimerInterval = setInterval(() => {
+          multiCountdown--;
+          if (multiCountdown >= 0) {
+            document.getElementById('multi-timer').innerText = multiCountdown;
+          } else {
+            clearInterval(multiTimerInterval);
+            multiTimer.remove();
+
+            const taskName = getRandomFromArray(selectedTasks);
+            const qa = taskName === '2x2' ? generateMeth2x2() : generateMethAddSub();
+
+            const title = document.createElement('h5');
+            title.className = 'text-center';
+            title.id = 'task-question';
+            title.innerText = qa.question;
+
+            const timerEl = document.createElement('span');
+            timerEl.className = 'badge bg-secondary';
+            timerEl.style.fontSize = '1.25rem';
+            timerEl.id = 'task-timer';
+            timerEl.innerText = '00:00:00';
+
+            const header = document.createElement('div');
+            header.className = 'd-flex justify-content-between';
+            header.appendChild(document.createElement('div'));
+            header.appendChild(timerEl);
+
+            const checkBtn = document.createElement('button');
+            checkBtn.className = 'btn btn-warning mt-3 w-100';
+            checkBtn.textContent = 'Check';
+
+            const result = document.createElement('div');
+            result.className = 'text-center mt-2';
+            result.id = 'task-answer';
+            result.style.display = 'none';
+            result.innerText = `Answer: ${qa.answer}`;
+
+            const rightBtn = document.createElement('button');
+            rightBtn.className = 'btn';
+            rightBtn.style.backgroundColor = 'var(--secondary)';
+            rightBtn.style.color = 'white';
+            rightBtn.textContent = 'Right';
+            rightBtn.style.display = 'none';
+
+            const wrongBtn = document.createElement('button');
+            wrongBtn.className = 'btn';
+            wrongBtn.style.backgroundColor = '#e57a2b';
+            wrongBtn.style.color = '#fff';
+            wrongBtn.textContent = 'Wrong';
+            wrongBtn.style.display = 'none';
+
+            const buttonRow = document.createElement('div');
+            buttonRow.className = 'd-flex justify-content-center gap-3 mt-2';
+            buttonRow.appendChild(wrongBtn);
+            buttonRow.appendChild(rightBtn);
+
+            let taskTime = 0;
+            const taskTimer = setInterval(() => {
+              taskTime++;
+              const m = String(Math.floor(taskTime / 60)).padStart(2, '0');
+              const s = String(taskTime % 60).padStart(2, '0');
+              document.getElementById('task-timer').innerText = `00:${m}:${s}`;
+            }, 1000);
+
+            checkBtn.onclick = () => {
+              clearInterval(taskTimer);
+              checkBtn.style.display = 'none';
+              result.style.display = 'block';
+              result.style.fontSize = '1.25rem';
+              rightBtn.style.display = 'inline-block';
+              wrongBtn.style.display = 'inline-block';
+            };
+
+            const taskRecord = [];
+            const completeTask = (correct) => {
+              taskRecord.push({
+                task: taskName,
+                question: qa.question,
+                answer: qa.answer,
+                duration: taskTime,
+                correct: correct
+              });
+              title.remove();
+              header.remove();
+              result.remove();
+              checkBtn.remove();
+              rightBtn.remove();
+              wrongBtn.remove();
+              buttonRow.remove();
+              showSecondPage();
+            };
+
+            rightBtn.onclick = () => completeTask(true);
+            wrongBtn.onclick = () => completeTask(false);
+
+            multiTaskGroup.appendChild(header);
+            multiTaskGroup.appendChild(title);
+            multiTaskGroup.appendChild(checkBtn);
+            multiTaskGroup.appendChild(result);
+            multiTaskGroup.appendChild(buttonRow);
+          }
+        }, 1000);
+        multitaskSection.style.display = 'block';
+      }
+      const mode = document.querySelector('input[name="mode"]:checked').value;
+      const difficulty = document.querySelector('input[name="difficulty"]:checked').value;
+      manuverList = generateManuvers(difficulty, mode);
+      currentManuverIndex = 0;
+
+      const manuverGroup = document.querySelector('#page2 .section .group');
+      manuverGroup.innerHTML = '';
+
+      if (mode === 'read-and-do') {
+        manuverGroup.innerHTML = `
+          <p id="manuver-text" style="text-align: center; display: flex; flex-direction: column; align-items: center;">
+            ${manuverList[0]} 
+          </p>
+          <div class="text-end">
+            <button class="btn btn-outline-light" id="next-btn">Next</button>
+          </div>`;
+        document.getElementById('next-btn').onclick = () => {
+          currentManuverIndex++;
+          if (currentManuverIndex < manuverList.length) {
+            document.getElementById('manuver-text').innerText = manuverList[currentManuverIndex];
+          } else {
+            document.getElementById('page2').style.display = 'none';
+            alert('進入第三頁（尚未實作）');
+          }
+        };
+      } else if (mode === 'memory') {
+        manuverGroup.style.display = 'flex';
+        manuverGroup.style.flexDirection = 'column';
+        manuverGroup.style.alignItems = 'center';
+        const manuverText = document.createElement('div');
+        manuverText.id = 'memory-manuver';
+        manuverText.style.textAlign = 'center';
+        manuverText.innerHTML = manuverList.map(item => `<p>${item}</p>`).join('');
+        manuverGroup.appendChild(manuverText);
+
+        const timerDisplay = document.createElement('div');
+        timerDisplay.id = 'memory-timer';
+        timerDisplay.className = 'text-center mb-3';
+        timerDisplay.innerHTML = '<span class="badge" style="background-color: var(--accent); font-size: 1.25rem;">30</span>';
+        manuverGroup.prepend(timerDisplay);
+
+        let countdown = 30;
+        const memoryCountdown = setInterval(() => {
+          countdown--;
+          timerDisplay.querySelector('span').innerText = countdown;
+          if (countdown <= 0) {
+            clearInterval(memoryCountdown);
+            manuverText.style.display = 'none';
+            timerDisplay.remove();
+            checkBtn.style.display = 'inline-block';
+            doneBtn.style.display = 'inline-block';
+          }
+        }, 1000);
+
+        const checkBtn = document.createElement('button');
+        checkBtn.className = 'btn btn-secondary';
+        checkBtn.style.display = 'none';
+        checkBtn.textContent = 'Check/Hide';
+        checkBtn.style.minWidth = '120px';
+        checkBtn.onclick = () => {
+          manuverText.style.display = (manuverText.style.display === 'none' || manuverText.style.display === '') ? 'block' : 'none';
+        };
+
+        const doneBtn = document.createElement('button');
+        doneBtn.className = 'btn btn-outline-light';
+        doneBtn.textContent = 'Done';
+        doneBtn.style.minWidth = '120px';
+        doneBtn.style.display = 'none';
+        doneBtn.onclick = () => {
+          document.getElementById('page2').style.display = 'none';
+          alert('進入第三頁（尚未實作）');
+        };
+
+        const btnRow = document.createElement('div');
+        btnRow.className = 'd-flex justify-content-center gap-3';
+        btnRow.appendChild(checkBtn);
+        btnRow.appendChild(doneBtn);
+        manuverGroup.appendChild(btnRow);
+      } else {
+        manuverGroup.innerHTML = manuverList.map(item => `<p>${item}</p>`).join('');
+      }
+
+      timeElapsed = 0;
+      document.getElementById('time-counter').innerText = 'Time: 00:00:00';
+      timerInterval = setInterval(() => {
+        timeElapsed++;
+        const hours = String(Math.floor(timeElapsed / 3600)).padStart(2, '0');
+        const minutes = String(Math.floor((timeElapsed % 3600) / 60)).padStart(2, '0');
+        const seconds = String(timeElapsed % 60).padStart(2, '0');
+        document.getElementById('time-counter').innerText = `Time: ${hours}:${minutes}:${seconds}`;
+      }, 1000);
+    }
+
+    function showManuverSection() {
+
+    }
+
+    function showMultiTaskSection(){
+      
+    }
+
+    function stopTimer() {
+      clearInterval(timerInterval);
+    }
+  </script>
+</head>
+<body>
+  <header>Simulator Assistant</header>
+  <div class="container py-4">
+    <!-- First Page -->
+    <div id="page1">
+      <div class="section">
+        <h2>Manuver</h2>
+        <div class="group">
+          <p>Difficulty:</p>
+          <div class="horizontal-group">
+            <div class="form-check form-check-inline">
+              <input class="form-check-input" type="radio" name="difficulty" value="easy" id="easy">
+              <label class="form-check-label" for="easy">Easy</label>
+            </div>
+            <div class="form-check form-check-inline">
+              <input class="form-check-input" type="radio" name="difficulty" value="mid" id="mid" checked>
+              <label class="form-check-label" for="mid">Mid</label>
+            </div>
+            <div class="form-check form-check-inline">
+              <input class="form-check-input" type="radio" name="difficulty" value="hard" id="hard">
+              <label class="form-check-label" for="hard">Hard</label>
+            </div>
+            <div class="form-check form-check-inline">
+              <input class="form-check-input" type="radio" name="difficulty" value="extreme" id="extreme">
+              <label class="form-check-label" for="extreme">Extreme</label>
+            </div>
+          </div>
+        </div>
+        <div class="group">
+          <p>Mode:</p>
+          <div class="form-check">
+            <input class="form-check-input" type="radio" name="mode" value="read-and-do" id="read" checked>
+            <label class="form-check-label" for="read">Read and Do</label>
+          </div>
+          <div class="form-check">
+            <input class="form-check-input" type="radio" name="mode" value="memory" id="memory">
+            <label class="form-check-label" for="memory">Short Term Memory</label>
+          </div>
+        </div>
+      </div>
+      <div class="section">
+        <h2>Multi-tasking</h2>
+        <div class="group">
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" name="task" value="2x2" id="2x2" checked>
+            <label class="form-check-label" for="2x2">Meth 2*2</label>
+          </div>
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" name="task" value="unit-change" id="unit-change">
+            <label class="form-check-label" for="unit-change">Meth Unit Change</label>
+          </div>
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" name="task" value="add-sub" id="add-sub" checked>
+            <label class="form-check-label" for="add-sub">Meth Add/Sub</label>
+          </div>
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" name="task" value="time-diff" id="time-diff">
+            <label class="form-check-label" for="time-diff">Time Difference Calculation</label>
+          </div>
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" name="task" value="type" id="type">
+            <label class="form-check-label" for="type">Type</label>
+          </div>
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" name="task" value="type-rev" id="type-rev">
+            <label class="form-check-label" for="type-rev">Type Rev</label>
+          </div>
+        </div>
+      </div>
+      <button class="btn start-btn w-100 py-3 mb-4" onclick="startSecondPage()">Start</button>
+    </div>
+
+    <!-- Second Page -->
+    <div id="page2">
+      <div class="section">
+        <h2 class="d-flex justify-content-between align-items-center">
+          <span>Manuver</span>
+          <span class="badge bg-secondary" id="time-counter">Time: 00:00:00</span>
+        </h2>
+        <div class="group">
+          <!-- dynamic content -->
+        </div>
+      </div>
+      <div class="section">
+        <h2>Multi-tasking</h2>
+        <div class="group">
+          <!-- empty initial -->
+        </div>
+      </div>
+      <button class="btn stop-btn w-100 py-3 mb-4" onclick="stopTimer()">Stop</button>
+    </div>
+  </div>
+</body>
+</html>
