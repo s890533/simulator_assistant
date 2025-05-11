@@ -448,8 +448,10 @@
             timerEl.innerText = '00:00:00';
 
             const header = document.createElement('div');
-            header.className = 'd-flex justify-content-between';
-            header.appendChild(document.createElement('div'));
+            header.className = 'd-flex justify-content-between align-items-center';
+            const taskLabel = document.createElement('div');
+            taskLabel.innerHTML = `<strong>Task:</strong> ${taskName}`;
+            header.appendChild(taskLabel);
             header.appendChild(timerEl);
 
             const checkBtn = document.createElement('button');
@@ -524,6 +526,7 @@
             rightBtn.onclick = () => completeTask(true);
             wrongBtn.onclick = () => completeTask(false);
 
+            // removed redundant taskLabel
             multiTaskGroup.appendChild(header);
             multiTaskGroup.appendChild(title);
             multiTaskGroup.appendChild(checkWrapper);
