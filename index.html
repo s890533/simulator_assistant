@@ -279,7 +279,7 @@
       }, 1000);
     }
 
-    function showMultiTaskSection(){
+    function showMultiTaskSection() {
       function generateMeth2x2() {
         const valid = (n) => n >= 11 && !(n % 10 === 5 || n % 10 === 0);
         let a, b;
@@ -297,6 +297,45 @@
         return { question: `${a} ${op} ${b}`, answer: op === '+' ? a + b : a - b };
       }
 
+      function generateMethUnitChange() {
+      const base = Math.floor(Math.random() * 9) + 1;
+      const zeroCount = Math.floor(Math.random() * 5);
+      const number = base * Math.pow(10, zeroCount);
+
+      const conversions = [
+        { label: 'NM to m', factor: 1852, from: 'NM', to: 'm' },
+        { label: 'm to NM', factor: 1 / 1852, from: 'm', to: 'NM' },
+        { label: 'NM to km', factor: 1.852, from: 'NM', to: 'km' },
+        { label: 'km to NM', factor: 1 / 1.852, from: 'km', to: 'NM' },
+        { label: 'NM to mi', factor: 1.151, from: 'NM', to: 'mi' },
+        { label: 'mi to NM', factor: 1 / 1.151, from: 'mi', to: 'NM' },
+        { label: 'NM to ft', factor: 6076.1154856, from: 'NM', to: 'ft' },
+        { label: 'ft to NM', factor: 1 / 6076.1154856, from: 'ft', to: 'NM' },
+        { label: 'ft to m', factor: 0.3048, from: 'ft', to: 'm' },
+        { label: 'm to ft', factor: 1 / 0.3048, from: 'm', to: 'ft' },
+        { label: 'kt to km/h', factor: 1.852, from: 'kt', to: 'km/h' },
+        { label: 'km/h to kt', factor: 1 / 1.852, from: 'km/h', to: 'kt' },
+        { label: 'lbs to kg', factor: 0.45359237, from: 'lbs', to: 'kg' },
+        { label: 'kg to lbs', factor: 1 / 0.45359237, from: 'kg', to: 'lbs' },
+        { label: 'inHg to hPa', factor: 33.863886666667, from: 'inHg', to: 'hPa' },
+        { label: 'hPa to inHg', factor: 1 / 33.863886666667, from: 'hPa', to: 'inHg' },
+        { label: 'C to F', formula: (v) => v * 9 / 5 + 32, from: '°C', to: '°F' },
+        { label: 'F to C', formula: (v) => (v - 32) * 5 / 9, from: '°F', to: '°C' }
+      ];
+
+      const selected = conversions[Math.floor(Math.random() * conversions.length)];
+      let answer;
+      if (selected.formula) {
+        answer = selected.formula(number);
+      } else {
+        answer = number * selected.factor;
+      }
+      return {
+        question: `${number} ${selected.from} = ? ${selected.to}`,
+        answer: Math.round(answer * 1000) / 1000
+      };
+    }
+
       function showMultiTaskQuestion(taskName) {
         const group = document.querySelectorAll('#page2 .section')[1].querySelector('.group');
         group.innerHTML = '';
@@ -305,6 +344,7 @@
         let qa;
         if (taskName === 'meth-2x2') qa = generateMeth2x2();
         if (taskName === 'meth-add-sub') qa = generateMethAddSub();
+        if (taskName === 'meth-unit-change') qa = generateMethUnitChange();
         title.innerText = qa ? qa.question : 'N/A';
         group.appendChild(title);
       }
@@ -338,7 +378,9 @@
             multiTimer.remove();
 
             const taskName = getRandomFromArray(selectedTasks);
-            const qa = taskName === 'meth-2x2' ? generateMeth2x2() : generateMethAddSub();
+            if (taskName === 'meth-2x2') qa = generateMeth2x2();
+            if (taskName === 'meth-add-sub') qa = generateMethAddSub();
+            if (taskName === 'meth-unit-change') qa = generateMethUnitChange();
 
             const title = document.createElement('h5');
             title.className = 'text-center';
@@ -574,7 +616,7 @@
       </div>
       <button class="btn stop-btn w-100 py-3 mb-4" onclick="stopTimer()">Stop</button>
     </div>
-
+    
     <!-- Third Page -->
     <div id="page3">
       <div class="section">
