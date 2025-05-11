@@ -446,7 +446,14 @@
           <td>${row.task}</td>
           <td>${row.question}</td>
           <td>${row.answer}</td>
-          <td>${row.duration}</td>
+          <td>
+            ${(() => {
+              const h = String(Math.floor(row.duration / 3600)).padStart(2, '0');
+              const m = String(Math.floor((row.duration % 3600) / 60)).padStart(2, '0');
+              const s = String(row.duration % 60).padStart(2, '0');
+              return `${h}:${m}:${s}`;
+            })()}
+          </td>
           <td>${row.correct ? '✔️' : '❌'}</td>`;
         tbody.appendChild(tr);
       }
@@ -574,7 +581,7 @@
               <th>Task</th>
               <th>Question</th>
               <th>Answer</th>
-              <th>Time (s)</th>
+              <th>Time</th>
               <th>Result</th>
             </tr>
           </thead>
