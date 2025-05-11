@@ -226,34 +226,34 @@
             clearInterval(memoryCountdown);
             manuverText.style.display = 'none';
             timerDisplay.remove();
-            checkBtn.style.display = 'inline-block';
-            doneBtn.style.display = 'inline-block';
+            memoryCheckBtn.style.display = 'inline-block';
+            memoryDoneBtn.style.display = 'inline-block';
           }
         }, 1000);
 
-        const checkBtn = document.createElement('button');
-        checkBtn.className = 'btn btn-secondary';
-        checkBtn.style.display = 'none';
-        checkBtn.textContent = 'Check/Hide';
-        checkBtn.style.minWidth = '120px';
-        checkBtn.onclick = () => {
+        const memoryCheckBtn = document.createElement('button');
+        memoryCheckBtn.className = 'btn btn-secondary';
+        memoryCheckBtn.style.display = 'none';
+        memoryCheckBtn.textContent = 'Check/Hide';
+        memoryCheckBtn.style.minWidth = '120px';
+        memoryCheckBtn.onclick = () => {
           manuverText.style.display = (manuverText.style.display === 'none' || manuverText.style.display === '') ? 'block' : 'none';
         };
 
-        const doneBtn = document.createElement('button');
-        doneBtn.className = 'btn btn-outline-light';
-        doneBtn.textContent = 'Done';
-        doneBtn.style.minWidth = '120px';
-        doneBtn.style.display = 'none';
-        doneBtn.onclick = () => {
+        const memoryDoneBtn = document.createElement('button');
+        memoryDoneBtn.className = 'btn btn-outline-light';
+        memoryDoneBtn.textContent = 'Done';
+        memoryDoneBtn.style.minWidth = '120px';
+        memoryDoneBtn.style.display = 'none';
+        memoryDoneBtn.onclick = () => {
           document.getElementById('page2').style.display = 'none';
           alert('進入第三頁（尚未實作）');
         };
 
         const btnRow = document.createElement('div');
         btnRow.className = 'd-flex justify-content-center gap-3';
-        btnRow.appendChild(checkBtn);
-        btnRow.appendChild(doneBtn);
+        btnRow.appendChild(memoryCheckBtn);
+        btnRow.appendChild(memoryDoneBtn);
         manuverGroup.appendChild(btnRow);
       } else {
         manuverGroup.innerHTML = manuverList.map(item => `<p>${item}</p>`).join('');
@@ -346,7 +346,10 @@
             header.appendChild(timerEl);
 
             const checkBtn = document.createElement('button');
-            checkBtn.className = 'btn btn-warning mt-3 w-100';
+            checkBtn.className = 'btn btn-warning mt-3';
+            const checkWrapper = document.createElement('div');
+            checkWrapper.className = 'd-flex justify-content-center';
+            checkWrapper.appendChild(checkBtn);
             checkBtn.textContent = 'Check';
 
             const result = document.createElement('div');
@@ -415,7 +418,7 @@
 
             multiTaskGroup.appendChild(header);
             multiTaskGroup.appendChild(title);
-            multiTaskGroup.appendChild(checkBtn);
+            multiTaskGroup.appendChild(checkWrapper);
             multiTaskGroup.appendChild(result);
             multiTaskGroup.appendChild(buttonRow);
           }
