@@ -303,8 +303,8 @@
         const title = document.createElement('h5');
         title.className = 'text-center';
         let qa;
-        if (taskName === '2x2') qa = generateMeth2x2();
-        if (taskName === 'add-sub') qa = generateMethAddSub();
+        if (taskName === 'meth-2x2') qa = generateMeth2x2();
+        if (taskName === 'meth-add-sub') qa = generateMethAddSub();
         title.innerText = qa ? qa.question : 'N/A';
         group.appendChild(title);
       }
@@ -338,7 +338,7 @@
             multiTimer.remove();
 
             const taskName = getRandomFromArray(selectedTasks);
-            const qa = taskName === '2x2' ? generateMeth2x2() : generateMethAddSub();
+            const qa = taskName === 'meth-2x2' ? generateMeth2x2() : generateMethAddSub();
 
             const title = document.createElement('h5');
             title.className = 'text-center';
@@ -523,28 +523,32 @@
         <h2>Multi-tasking</h2>
         <div class="group">
           <div class="form-check">
-            <input class="form-check-input" type="checkbox" name="task" value="2x2" id="2x2" checked>
-            <label class="form-check-label" for="2x2">Meth 2*2</label>
+            <input class="form-check-input" type="checkbox" name="task" value="meth-2x2" id="meth-2x2" checked>
+            <label class="form-check-label" for="meth-2x2">Meth 2*2</label>
           </div>
           <div class="form-check">
-            <input class="form-check-input" type="checkbox" name="task" value="unit-change" id="unit-change">
-            <label class="form-check-label" for="unit-change">Meth Unit Change</label>
+            <input class="form-check-input" type="checkbox" name="task" value="meth-unit-change" id="meth-unit-change">
+            <label class="form-check-label" for="meth-unit-change">Meth Unit Change</label>
           </div>
           <div class="form-check">
-            <input class="form-check-input" type="checkbox" name="task" value="add-sub" id="add-sub" checked>
-            <label class="form-check-label" for="add-sub">Meth Add/Sub</label>
+            <input class="form-check-input" type="checkbox" name="task" value="meth-add-sub" id="meth-add-sub" checked>
+            <label class="form-check-label" for="meth-add-sub">Meth Add/Sub</label>
           </div>
           <div class="form-check">
-            <input class="form-check-input" type="checkbox" name="task" value="time-diff" id="time-diff">
-            <label class="form-check-label" for="time-diff">Time Difference Calculation</label>
+            <input class="form-check-input" type="checkbox" name="task" value="timezone-conversion" id="timezone-conversion">
+            <label class="form-check-label" for="timezone-conversion">Convert Time Between Time Zones</label>
           </div>
           <div class="form-check">
-            <input class="form-check-input" type="checkbox" name="task" value="type" id="type">
-            <label class="form-check-label" for="type">Type</label>
+            <input class="form-check-input" type="checkbox" name="task" value="calculate-arrival-time" id="calculate-arrival-time">
+            <label class="form-check-label" for="calculate-arrival-time">Calculate Arrival Time</label>
           </div>
           <div class="form-check">
-            <input class="form-check-input" type="checkbox" name="task" value="type-rev" id="type-rev">
-            <label class="form-check-label" for="type-rev">Type Rev</label>
+            <input class="form-check-input" type="checkbox" name="task" value="zh_to_en" id="zh_to_en">
+            <label class="form-check-label" for="zh_to_en">Translate Chinese to English</label>
+          </div>
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" name="task" value="zh_to_en_reversed" id="zh_to_en_reversed">
+            <label class="form-check-label" for="zh_to_en_reversed">Translate Chinese to Reverse English</label>
           </div>
         </div>
       </div>
@@ -570,7 +574,7 @@
       </div>
       <button class="btn stop-btn w-100 py-3 mb-4" onclick="stopTimer()">Stop</button>
     </div>
-    
+
     <!-- Third Page -->
     <div id="page3">
       <div class="section">
