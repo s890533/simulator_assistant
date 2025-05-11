@@ -280,6 +280,31 @@
     }
 
     function showMultiTaskSection() {
+
+      function getRandomInt(min, max) {
+        return Math.floor(Math.random() * (max - min + 1)) + min;
+      }
+
+      function getRandomFloat(min, max, decimals = 1) {
+        const factor = Math.pow(10, decimals);
+        return Math.round((Math.random() * (max - min) + min) * factor) / factor;
+      }
+
+      function getRandomDateTime() {
+        const year = 2025;
+        const month = getRandomInt(1, 12);
+        const day = getRandomInt(1, 28); // safe range for all months
+        const hour = getRandomInt(0, 23);
+        const minute = getRandomInt(0, 59);
+        const pad = (n) => n.toString().padStart(2, '0');
+        return `${year}/${pad(month)}/${pad(day)} ${pad(hour)}:${pad(minute)}`;
+      }
+
+      function getRandomTimezone() {
+        const offset = getRandomInt(-12, 12);
+        return `UTC${offset >= 0 ? '+' : ''}${offset}`;
+      }
+
       function generateMeth2x2() {
         const valid = (n) => n >= 11 && !(n % 10 === 5 || n % 10 === 0);
         let a, b;
@@ -387,11 +412,58 @@
         };
       }
 
+      function generateArrivalTime() {
+        const departureTime = getRandomDateTime();
+        let fromTimezone = getRandomTimezone();
+        let toTimezone = getRandomTimezone();
+
+        // Ensure from ≠ to
+        while (fromTimezone === toTimezone) {
+          toTimezone = getRandomTimezone();
+        }
+
+        const direction = Math.random() < 0.5 ? 'East' : 'West';
+        const flightHours = getRandomFloat(1, 15, 1); // 1.0 to 15.0 hours
+
+        // Parse departure time into Date object
+        const [datePart, timePart] = departureTime.split(' ');
+        const [year, month, day] = datePart.split('/').map(Number);
+        const [hour, minute] = timePart.split(':').map(Number);
+        let departureDate = new Date(Date.UTC(year, month - 1, day, hour, minute));
+
+        // Parse timezone offsets
+        const parseTimezone = (tz) => parseInt(tz.replace('UTC', ''), 10);
+        const fromOffset = parseTimezone(fromTimezone);
+        const toOffset = parseTimezone(toTimezone);
+
+        // Convert to UTC
+        departureDate.setUTCHours(departureDate.getUTCHours() - fromOffset);
+
+        // Add flight duration
+        let arrivalUTC = new Date(departureDate.getTime() + flightHours * 60 * 60 * 1000);
+
+        // Convert to arrival local time
+        arrivalUTC.setUTCHours(arrivalUTC.getUTCHours() + toOffset);
+
+        // Format arrival time
+        const pad = (n) => n.toString().padStart(2, '0');
+        const formattedArrival = `${arrivalUTC.getUTCFullYear()}/${pad(arrivalUTC.getUTCMonth() + 1)}/${pad(arrivalUTC.getUTCDate())} ${pad(arrivalUTC.getUTCHours())}:${pad(arrivalUTC.getUTCMinutes())}`;
+
+        // Build English question
+        const question = `If a plane departs from ${fromTimezone} at ${departureTime} and flies ${direction} for ${flightHours} hours, what is the arrival time in ${toTimezone}?`;
+
+        return {
+          question,
+          answer: formattedArrival
+        };
+      }
+
       function generateQuestion(taskName) {
         if (taskName === '2x2') return generateMeth2x2();
         if (taskName === 'add-sub') return generateMethAddSub();
         if (taskName === 'unit-change') return generateMethUnitChange();
         if (taskName === 'timezone-conversion') return generateMethTimezoneConversion();
+        if (taskName === 'calculate-arrival-time') return generateArrivalTime();
         return generateMeth2x2();
       }
 
@@ -638,7 +710,7 @@
             <label class="form-check-label" for="timezone-conversion">Convert Time Between Time Zones</label>
           </div>
           <div class="form-check">
-            <input class="form-check-input" type="checkbox" name="task" value="calculate-arrival-time" id="calculate-arrival-time" disabled>
+            <input class="form-check-input" type="checkbox" name="task" value="calculate-arrival-time" id="calculate-arrival-time">
             <label class="form-check-label" for="calculate-arrival-time">Calculate Arrival Time</label>
           </div>
           <div class="form-check">
