@@ -86,9 +86,26 @@
     #page2 {
       display: none;
     }
+
+    #page3 {
+      display: none;
+    }
+  
+
+    /* Ensure third page manuver text is centered */
+    #manuver-summary p {
+      text-align: center;
+    }
   </style>
   <script>
+    let multiTimerInterval;
+    var taskRecord = [];
+    var manuverList = [];
+    
+
     function startSecondPage() {
+      taskRecord = [];
+      manuverList = [];
       document.getElementById('page1').style.display = 'none';
       document.getElementById('page2').style.display = 'block';
       showSecondPage();
@@ -97,7 +114,6 @@
     let timerInterval;
     let timeElapsed = 0;
     let currentManuverIndex = 0;
-    let manuverList = [];
 
     function getRandomFromArray(arr) {
       return arr[Math.floor(Math.random() * arr.length)];
@@ -170,8 +186,127 @@
     }
 
     function showSecondPage() {
+      showMultiTaskSection();
+      
+      const mode = document.querySelector('input[name="mode"]:checked').value;
+      const difficulty = document.querySelector('input[name="difficulty"]:checked').value;
+      manuverList = generateManuvers(difficulty, mode);
+      currentManuverIndex = 0;
+
+      const manuverGroup = document.querySelector('#page2 .section .group');
+      manuverGroup.innerHTML = '';
+
+      if (mode === 'read-and-do') {
+        manuverGroup.innerHTML = `
+          <p id="manuver-text" style="text-align: center; display: flex; flex-direction: column; align-items: center;">
+            ${manuverList[0]} 
+          </p>
+          <div class="text-end">
+            <button class="btn btn-outline-light" id="next-btn">Next</button>
+          </div>`;
+        document.getElementById('next-btn').onclick = () => {
+          currentManuverIndex++;
+          if (currentManuverIndex < manuverList.length) {
+            document.getElementById('manuver-text').innerText = manuverList[currentManuverIndex];
+          } else {
+            stopTimer();
+          }
+        };
+      } else if (mode === 'memory') {
+        manuverGroup.style.display = 'flex';
+        manuverGroup.style.flexDirection = 'column';
+        manuverGroup.style.alignItems = 'center';
+        const manuverText = document.createElement('div');
+        manuverText.id = 'memory-manuver';
+        manuverText.style.textAlign = 'center';
+        manuverText.innerHTML = manuverList.map(item => `<p>${item}</p>`).join('');
+        manuverGroup.appendChild(manuverText);
+
+        const timerDisplay = document.createElement('div');
+        timerDisplay.id = 'memory-timer';
+        timerDisplay.className = 'text-center mb-3';
+        timerDisplay.innerHTML = '<span class="badge" style="background-color: var(--accent); font-size: 1.25rem;">30</span>';
+        manuverGroup.prepend(timerDisplay);
+
+        let countdown = 30;
+        const memoryCountdown = setInterval(() => {
+          countdown--;
+          timerDisplay.querySelector('span').innerText = countdown;
+          if (countdown <= 0) {
+            clearInterval(memoryCountdown);
+            manuverText.style.display = 'none';
+            timerDisplay.remove();
+            memoryCheckBtn.style.display = 'inline-block';
+            memoryDoneBtn.style.display = 'inline-block';
+          }
+        }, 1000);
+
+        const memoryCheckBtn = document.createElement('button');
+        memoryCheckBtn.className = 'btn btn-secondary';
+        memoryCheckBtn.style.display = 'none';
+        memoryCheckBtn.textContent = 'Check/Hide';
+        memoryCheckBtn.style.minWidth = '120px';
+        memoryCheckBtn.onclick = () => {
+          manuverText.style.display = (manuverText.style.display === 'none' || manuverText.style.display === '') ? 'block' : 'none';
+        };
+
+        const memoryDoneBtn = document.createElement('button');
+        memoryDoneBtn.className = 'btn btn-outline-light';
+        memoryDoneBtn.textContent = 'Done';
+        memoryDoneBtn.style.minWidth = '120px';
+        memoryDoneBtn.style.display = 'none';
+        memoryDoneBtn.onclick = () => {
+          stopTimer();
+        };
+
+        const btnRow = document.createElement('div');
+        btnRow.className = 'd-flex justify-content-center gap-3';
+        btnRow.appendChild(memoryCheckBtn);
+        btnRow.appendChild(memoryDoneBtn);
+        manuverGroup.appendChild(btnRow);
+      } else {
+        manuverGroup.innerHTML = manuverList.map(item => `<p>${item}</p>`).join('');
+      }
+
+      timeElapsed = 0;
+      document.getElementById('time-counter').innerText = 'Time: 00:00:00';
+      timerInterval = setInterval(() => {
+        timeElapsed++;
+        const hours = String(Math.floor(timeElapsed / 3600)).padStart(2, '0');
+        const minutes = String(Math.floor((timeElapsed % 3600) / 60)).padStart(2, '0');
+        const seconds = String(timeElapsed % 60).padStart(2, '0');
+        document.getElementById('time-counter').innerText = `Time: ${hours}:${minutes}:${seconds}`;
+      }, 1000);
+    }
+
+    function showMultiTaskSection() {
+
+      function getRandomInt(min, max) {
+        return Math.floor(Math.random() * (max - min + 1)) + min;
+      }
+
+      function getRandomFloat(min, max, decimals = 1) {
+        const factor = Math.pow(10, decimals);
+        return Math.round((Math.random() * (max - min) + min) * factor) / factor;
+      }
+
+      function getRandomDateTime() {
+        const year = 2025;
+        const month = getRandomInt(1, 12);
+        const day = getRandomInt(1, 28); // safe range for all months
+        const hour = getRandomInt(0, 23);
+        const minute = getRandomInt(0, 59);
+        const pad = (n) => n.toString().padStart(2, '0');
+        return `${year}/${pad(month)}/${pad(day)} ${pad(hour)}:${pad(minute)}`;
+      }
+
+      function getRandomTimezone() {
+        const offset = getRandomInt(-12, 12);
+        return `UTC${offset >= 0 ? '+' : ''}${offset}`;
+      }
+
       function generateMeth2x2() {
-        const valid = (n) => n >= 10 && !(n % 10 === 5 || n % 10 === 0);
+        const valid = (n) => n >= 11 && !(n % 10 === 5 || n % 10 === 0);
         let a, b;
         do { a = Math.floor(Math.random() * 90) + 10; } while (!valid(a));
         do { b = Math.floor(Math.random() * 90) + 10; } while (!valid(b));
@@ -187,24 +322,168 @@
         return { question: `${a} ${op} ${b}`, answer: op === '+' ? a + b : a - b };
       }
 
+      function generateMethUnitChange() {
+        const base = Math.floor(Math.random() * 9) + 1;
+        const zeroCount = Math.floor(Math.random() * 5);
+        const number = base * Math.pow(10, zeroCount);
+
+        const conversions = [
+          { label: 'NM to m', factor: 1852, from: 'NM', to: 'm' },
+          { label: 'm to NM', factor: 1 / 1852, from: 'm', to: 'NM' },
+          { label: 'NM to km', factor: 1.852, from: 'NM', to: 'km' },
+          { label: 'km to NM', factor: 1 / 1.852, from: 'km', to: 'NM' },
+          { label: 'NM to mi', factor: 1.151, from: 'NM', to: 'mi' },
+          { label: 'mi to NM', factor: 1 / 1.151, from: 'mi', to: 'NM' },
+          { label: 'NM to ft', factor: 6076.1154856, from: 'NM', to: 'ft' },
+          { label: 'ft to NM', factor: 1 / 6076.1154856, from: 'ft', to: 'NM' },
+          { label: 'ft to m', factor: 0.3048, from: 'ft', to: 'm' },
+          { label: 'm to ft', factor: 1 / 0.3048, from: 'm', to: 'ft' },
+          { label: 'kt to km/h', factor: 1.852, from: 'kt', to: 'km/h' },
+          { label: 'km/h to kt', factor: 1 / 1.852, from: 'km/h', to: 'kt' },
+          { label: 'lbs to kg', factor: 0.45359237, from: 'lbs', to: 'kg' },
+          { label: 'kg to lbs', factor: 1 / 0.45359237, from: 'kg', to: 'lbs' },
+          { label: 'inHg to hPa', factor: 33.863886666667, from: 'inHg', to: 'hPa' },
+          { label: 'hPa to inHg', factor: 1 / 33.863886666667, from: 'hPa', to: 'inHg' },
+          { label: 'C to F', formula: (v) => v * 9 / 5 + 32, from: '°C', to: '°F' },
+          { label: 'F to C', formula: (v) => (v - 32) * 5 / 9, from: '°F', to: '°C' }
+        ];
+
+        const selected = conversions[Math.floor(Math.random() * conversions.length)];
+        let answer;
+        if (selected.formula) {
+          answer = selected.formula(number);
+        } else {
+          answer = number * selected.factor;
+        }
+        return {
+          question: `${number} ${selected.from} = ? ${selected.to}`,
+          answer: Math.round(answer * 1000) / 1000
+        };
+      }
+
+      function generateMethTimezoneConversion() {
+        // Helper to generate random longitude in steps of 5 degrees (up to 180 degrees only)
+        function randomLongitude() {
+          const degree = Math.floor(Math.random() * 37) * 5; // 0 to 180
+          const direction = Math.random() < 0.5 ? 'E' : 'W';
+          return {
+            degree,
+            direction,
+            label: `${direction}${degree}`,
+            offset: direction === 'E' ? degree / 15 : -degree / 15
+          };
+        }
+
+        // Generate distinct longitudes
+        let from = randomLongitude();
+        let to;
+        do {
+          to = randomLongitude();
+        } while (from.label === to.label);
+
+        // Generate random date and time (today's date)
+        const now = new Date();
+        const randomHour = Math.floor(Math.random() * 24);
+        const randomMinute = Math.floor(Math.random() * 60);
+        now.setHours(randomHour);
+        now.setMinutes(randomMinute);
+        now.setSeconds(0);
+        now.setMilliseconds(0);
+
+        // Format date time as yyyy/MM/dd hh:mm
+        function formatDateTime(date) {
+          const yyyy = date.getFullYear();
+          const MM = (date.getMonth() + 1).toString().padStart(2, '0');
+          const dd = date.getDate().toString().padStart(2, '0');
+          const hh = date.getHours().toString().padStart(2, '0');
+          const mm = date.getMinutes().toString().padStart(2, '0');
+          return `${yyyy}/${MM}/${dd} ${hh}:${mm}`;
+        }
+
+        const fromTime = new Date(now.getTime());
+
+        // Apply timezone offset to calculate target time
+        const offsetDiffInMinutes = (to.offset - from.offset) * 60;
+        const toTime = new Date(fromTime.getTime() + offsetDiffInMinutes * 60000);
+
+        return {
+          question: `If it's ${formatDateTime(fromTime)} at ${from.label}, what time is it at ${to.label}?`,
+          answer: formatDateTime(toTime)
+        };
+      }
+
+      function generateArrivalTime() {
+        const departureTime = getRandomDateTime();
+        let fromTimezone = getRandomTimezone();
+        let toTimezone = getRandomTimezone();
+
+        // Ensure from ≠ to
+        while (fromTimezone === toTimezone) {
+          toTimezone = getRandomTimezone();
+        }
+
+        const direction = Math.random() < 0.5 ? 'East' : 'West';
+        const flightHours = getRandomFloat(1, 15, 1); // 1.0 to 15.0 hours
+
+        // Parse departure time into Date object
+        const [datePart, timePart] = departureTime.split(' ');
+        const [year, month, day] = datePart.split('/').map(Number);
+        const [hour, minute] = timePart.split(':').map(Number);
+        let departureDate = new Date(Date.UTC(year, month - 1, day, hour, minute));
+
+        // Parse timezone offsets
+        const parseTimezone = (tz) => parseInt(tz.replace('UTC', ''), 10);
+        const fromOffset = parseTimezone(fromTimezone);
+        const toOffset = parseTimezone(toTimezone);
+
+        // Convert to UTC
+        departureDate.setUTCHours(departureDate.getUTCHours() - fromOffset);
+
+        // Add flight duration
+        let arrivalUTC = new Date(departureDate.getTime() + flightHours * 60 * 60 * 1000);
+
+        // Convert to arrival local time
+        arrivalUTC.setUTCHours(arrivalUTC.getUTCHours() + toOffset);
+
+        // Format arrival time
+        const pad = (n) => n.toString().padStart(2, '0');
+        const formattedArrival = `${arrivalUTC.getUTCFullYear()}/${pad(arrivalUTC.getUTCMonth() + 1)}/${pad(arrivalUTC.getUTCDate())} ${pad(arrivalUTC.getUTCHours())}:${pad(arrivalUTC.getUTCMinutes())}`;
+
+        // Build English question
+        const question = `If a plane departs from ${fromTimezone} at ${departureTime} and flies ${direction} for ${flightHours} hours, what is the arrival time in ${toTimezone}?`;
+
+        return {
+          question,
+          answer: formattedArrival
+        };
+      }
+
+      function generateQuestion(taskName) {
+        if (taskName === '2x2') return generateMeth2x2();
+        if (taskName === 'add-sub') return generateMethAddSub();
+        if (taskName === 'unit-change') return generateMethUnitChange();
+        if (taskName === 'timezone-conversion') return generateMethTimezoneConversion();
+        if (taskName === 'calculate-arrival-time') return generateArrivalTime();
+        return generateMeth2x2();
+      }
+
       function showMultiTaskQuestion(taskName) {
         const group = document.querySelectorAll('#page2 .section')[1].querySelector('.group');
         group.innerHTML = '';
         const title = document.createElement('h5');
         title.className = 'text-center';
-        let qa;
-        if (taskName === '2x2') qa = generateMeth2x2();
-        if (taskName === 'add-sub') qa = generateMethAddSub();
+        let qa = generateQuestion(taskName);
         title.innerText = qa ? qa.question : 'N/A';
         group.appendChild(title);
       }
-      
+
       const selectedTasks = Array.from(document.querySelectorAll('input[name="task"]:checked')).map(el => el.value);
       const multitaskSection = document.querySelectorAll('#page2 .section')[1];
       
       if (selectedTasks.length === 0) {
         multitaskSection.style.display = 'none';
-      } else {
+      } 
+      else {
         multitaskSection.style.display = 'block';
         const multiTaskGroup = multitaskSection.querySelector('.group');
         multiTaskGroup.innerHTML = '';
@@ -214,18 +493,20 @@
         multiTimer.innerHTML = '<span id="multi-timer" class="badge" style="background-color: var(--accent); font-size: 1.5rem;"></span>';
         multiTaskGroup.appendChild(multiTimer);
         //let multiCountdown = Math.floor(Math.random() * (200 - 30 + 1)) + 30;
-        let multiCountdown = Math.floor(Math.random() * (40 - 30 + 1)) + 30;
+        let multiCountdown = Math.floor(Math.random() * (40 - 30 + 1));
         document.getElementById('multi-timer').innerText = multiCountdown;
-        const multiTimerInterval = setInterval(() => {
+        multiTimerInterval = setInterval(() => {
+          if (multiCountdown > 1) {
           multiCountdown--;
-          if (multiCountdown >= 0) {
-            document.getElementById('multi-timer').innerText = multiCountdown;
-          } else {
+          document.getElementById('multi-timer').innerText = multiCountdown;
+        } else {
+          clearInterval(multiTimerInterval);
+          multiTimer.remove();
             clearInterval(multiTimerInterval);
             multiTimer.remove();
 
             const taskName = getRandomFromArray(selectedTasks);
-            const qa = taskName === '2x2' ? generateMeth2x2() : generateMethAddSub();
+            qa = generateQuestion(taskName);
 
             const title = document.createElement('h5');
             title.className = 'text-center';
@@ -239,12 +520,17 @@
             timerEl.innerText = '00:00:00';
 
             const header = document.createElement('div');
-            header.className = 'd-flex justify-content-between';
-            header.appendChild(document.createElement('div'));
+            header.className = 'd-flex justify-content-between align-items-center';
+            const taskLabel = document.createElement('div');
+            taskLabel.innerHTML = `<strong>Task:</strong> ${taskName}`;
+            header.appendChild(taskLabel);
             header.appendChild(timerEl);
 
             const checkBtn = document.createElement('button');
-            checkBtn.className = 'btn btn-warning mt-3 w-100';
+            checkBtn.className = 'btn btn-warning mt-3';
+            const checkWrapper = document.createElement('div');
+            checkWrapper.className = 'd-flex justify-content-center';
+            checkWrapper.appendChild(checkBtn);
             checkBtn.textContent = 'Check';
 
             const result = document.createElement('div');
@@ -275,9 +561,10 @@
             let taskTime = 0;
             const taskTimer = setInterval(() => {
               taskTime++;
-              const m = String(Math.floor(taskTime / 60)).padStart(2, '0');
+              const h = String(Math.floor(taskTime / 3600)).padStart(2, '0');
+              const m = String(Math.floor((taskTime % 3600) / 60)).padStart(2, '0');
               const s = String(taskTime % 60).padStart(2, '0');
-              document.getElementById('task-timer').innerText = `00:${m}:${s}`;
+              document.getElementById('task-timer').innerText = `${h}:${m}:${s}`;
             }, 1000);
 
             checkBtn.onclick = () => {
@@ -289,7 +576,7 @@
               wrongBtn.style.display = 'inline-block';
             };
 
-            const taskRecord = [];
+            
             const completeTask = (correct) => {
               taskRecord.push({
                 task: taskName,
@@ -305,124 +592,61 @@
               rightBtn.remove();
               wrongBtn.remove();
               buttonRow.remove();
-              showSecondPage();
+              showMultiTaskSection();
             };
 
             rightBtn.onclick = () => completeTask(true);
             wrongBtn.onclick = () => completeTask(false);
 
+            // removed redundant taskLabel
             multiTaskGroup.appendChild(header);
             multiTaskGroup.appendChild(title);
-            multiTaskGroup.appendChild(checkBtn);
+            multiTaskGroup.appendChild(checkWrapper);
             multiTaskGroup.appendChild(result);
             multiTaskGroup.appendChild(buttonRow);
           }
         }, 1000);
         multitaskSection.style.display = 'block';
       }
-      const mode = document.querySelector('input[name="mode"]:checked').value;
-      const difficulty = document.querySelector('input[name="difficulty"]:checked').value;
-      manuverList = generateManuvers(difficulty, mode);
-      currentManuverIndex = 0;
-
-      const manuverGroup = document.querySelector('#page2 .section .group');
-      manuverGroup.innerHTML = '';
-
-      if (mode === 'read-and-do') {
-        manuverGroup.innerHTML = `
-          <p id="manuver-text" style="text-align: center; display: flex; flex-direction: column; align-items: center;">
-            ${manuverList[0]} 
-          </p>
-          <div class="text-end">
-            <button class="btn btn-outline-light" id="next-btn">Next</button>
-          </div>`;
-        document.getElementById('next-btn').onclick = () => {
-          currentManuverIndex++;
-          if (currentManuverIndex < manuverList.length) {
-            document.getElementById('manuver-text').innerText = manuverList[currentManuverIndex];
-          } else {
-            document.getElementById('page2').style.display = 'none';
-            alert('進入第三頁（尚未實作）');
-          }
-        };
-      } else if (mode === 'memory') {
-        manuverGroup.style.display = 'flex';
-        manuverGroup.style.flexDirection = 'column';
-        manuverGroup.style.alignItems = 'center';
-        const manuverText = document.createElement('div');
-        manuverText.id = 'memory-manuver';
-        manuverText.style.textAlign = 'center';
-        manuverText.innerHTML = manuverList.map(item => `<p>${item}</p>`).join('');
-        manuverGroup.appendChild(manuverText);
-
-        const timerDisplay = document.createElement('div');
-        timerDisplay.id = 'memory-timer';
-        timerDisplay.className = 'text-center mb-3';
-        timerDisplay.innerHTML = '<span class="badge" style="background-color: var(--accent); font-size: 1.25rem;">30</span>';
-        manuverGroup.prepend(timerDisplay);
-
-        let countdown = 30;
-        const memoryCountdown = setInterval(() => {
-          countdown--;
-          timerDisplay.querySelector('span').innerText = countdown;
-          if (countdown <= 0) {
-            clearInterval(memoryCountdown);
-            manuverText.style.display = 'none';
-            timerDisplay.remove();
-            checkBtn.style.display = 'inline-block';
-            doneBtn.style.display = 'inline-block';
-          }
-        }, 1000);
-
-        const checkBtn = document.createElement('button');
-        checkBtn.className = 'btn btn-secondary';
-        checkBtn.style.display = 'none';
-        checkBtn.textContent = 'Check/Hide';
-        checkBtn.style.minWidth = '120px';
-        checkBtn.onclick = () => {
-          manuverText.style.display = (manuverText.style.display === 'none' || manuverText.style.display === '') ? 'block' : 'none';
-        };
-
-        const doneBtn = document.createElement('button');
-        doneBtn.className = 'btn btn-outline-light';
-        doneBtn.textContent = 'Done';
-        doneBtn.style.minWidth = '120px';
-        doneBtn.style.display = 'none';
-        doneBtn.onclick = () => {
-          document.getElementById('page2').style.display = 'none';
-          alert('進入第三頁（尚未實作）');
-        };
-
-        const btnRow = document.createElement('div');
-        btnRow.className = 'd-flex justify-content-center gap-3';
-        btnRow.appendChild(checkBtn);
-        btnRow.appendChild(doneBtn);
-        manuverGroup.appendChild(btnRow);
-      } else {
-        manuverGroup.innerHTML = manuverList.map(item => `<p>${item}</p>`).join('');
-      }
-
-      timeElapsed = 0;
-      document.getElementById('time-counter').innerText = 'Time: 00:00:00';
-      timerInterval = setInterval(() => {
-        timeElapsed++;
-        const hours = String(Math.floor(timeElapsed / 3600)).padStart(2, '0');
-        const minutes = String(Math.floor((timeElapsed % 3600) / 60)).padStart(2, '0');
-        const seconds = String(timeElapsed % 60).padStart(2, '0');
-        document.getElementById('time-counter').innerText = `Time: ${hours}:${minutes}:${seconds}`;
-      }, 1000);
-    }
-
-    function showManuverSection() {
-
-    }
-
-    function showMultiTaskSection(){
-      
     }
 
     function stopTimer() {
+      clearInterval(multiTimerInterval);
       clearInterval(timerInterval);
+      document.getElementById('page2').style.display = 'none';
+      document.getElementById('page3').style.display = 'block';
+
+      document.getElementById('final-time-counter').innerText = document.getElementById('time-counter').innerText;
+
+      const summary = document.getElementById('manuver-summary');
+      summary.innerHTML = manuverList.map(item => `<p>${item}</p>`).join('');
+
+      const tbody = document.getElementById('task-record-body');
+      tbody.innerHTML = '';
+      for (const row of taskRecord) {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${row.task}</td>
+          <td>${row.question}</td>
+          <td>${row.answer}</td>
+          <td>
+            ${(() => {
+              const h = String(Math.floor(row.duration / 3600)).padStart(2, '0');
+              const m = String(Math.floor((row.duration % 3600) / 60)).padStart(2, '0');
+              const s = String(row.duration % 60).padStart(2, '0');
+              return `${h}:${m}:${s}`;
+            })()}
+          </td>
+          <td>${row.correct ? '✔️' : '❌'}</td>`;
+        tbody.appendChild(tr);
+      }
+    }
+
+    function restartApp() {
+      document.getElementById('page3').style.display = 'none';
+      document.getElementById('page1').style.display = 'block';
+
+          clearInterval(timerInterval);
     }
   </script>
 </head>
@@ -475,23 +699,27 @@
           </div>
           <div class="form-check">
             <input class="form-check-input" type="checkbox" name="task" value="unit-change" id="unit-change">
-            <label class="form-check-label" for="unit-change">Meth Unit Change</label>
+            <label class="form-check-label" for="unit-change">Meth Unit Change <a href="unit-conversion.html" target="_blank" style="color: var(--secondary); text-decoration: underline; font-size: 0.9rem;">Info</a></label>
           </div>
           <div class="form-check">
             <input class="form-check-input" type="checkbox" name="task" value="add-sub" id="add-sub" checked>
             <label class="form-check-label" for="add-sub">Meth Add/Sub</label>
           </div>
           <div class="form-check">
-            <input class="form-check-input" type="checkbox" name="task" value="time-diff" id="time-diff">
-            <label class="form-check-label" for="time-diff">Time Difference Calculation</label>
+            <input class="form-check-input" type="checkbox" name="task" value="timezone-conversion" id="timezone-conversion">
+            <label class="form-check-label" for="timezone-conversion">Convert Time Between Time Zones</label>
           </div>
           <div class="form-check">
-            <input class="form-check-input" type="checkbox" name="task" value="type" id="type">
-            <label class="form-check-label" for="type">Type</label>
+            <input class="form-check-input" type="checkbox" name="task" value="calculate-arrival-time" id="calculate-arrival-time">
+            <label class="form-check-label" for="calculate-arrival-time">Calculate Arrival Time</label>
           </div>
           <div class="form-check">
-            <input class="form-check-input" type="checkbox" name="task" value="type-rev" id="type-rev">
-            <label class="form-check-label" for="type-rev">Type Rev</label>
+            <input class="form-check-input" type="checkbox" name="task" value="zh_to_en" id="zh_to_en" disabled>
+            <label class="form-check-label" for="zh_to_en">Translate Chinese to English</label>
+          </div>
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" name="task" value="zh_to_en_reversed" id="zh_to_en_reversed" disabled>
+            <label class="form-check-label" for="zh_to_en_reversed">Translate Chinese to Reverse English</label>
           </div>
         </div>
       </div>
@@ -517,6 +745,44 @@
       </div>
       <button class="btn stop-btn w-100 py-3 mb-4" onclick="stopTimer()">Stop</button>
     </div>
+    
+    <!-- Third Page -->
+    <div id="page3">
+      <div class="section">
+        <h2 class="d-flex justify-content-between align-items-center">
+          <span>Manuver</span>
+          <span class="badge bg-secondary" id="final-time-counter">Time: 00:00:00</span>
+        </h2>
+        <div class="group" id="manuver-summary">
+          <!-- all manuver tasks will be listed here -->
+        </div>
+      </div>
+
+      <div class="section">
+        <h2>Multi-tasking</h2>
+        <div class="group">
+          <table class="table table-dark table-striped" style="width: 90%; margin: 0 auto;">
+            <thead>
+              <tr>
+                <th>Task</th>
+                <th>Question</th>
+                <th>Answer</th>
+                <th>Time</th>
+                <th>Result</th>
+              </tr>
+            </thead>
+            <tbody id="task-record-body">
+              <!-- taskRecord entries -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <button class="btn start-btn w-100 py-3 mb-4" onclick="restartApp()">Restart</button>
+    </div>
   </div>
+
+  
+
 </body>
 </html>
