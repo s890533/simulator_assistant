@@ -379,9 +379,10 @@
             let taskTime = 0;
             const taskTimer = setInterval(() => {
               taskTime++;
-              const m = String(Math.floor(taskTime / 60)).padStart(2, '0');
+              const h = String(Math.floor(taskTime / 3600)).padStart(2, '0');
+              const m = String(Math.floor((taskTime % 3600) / 60)).padStart(2, '0');
               const s = String(taskTime % 60).padStart(2, '0');
-              document.getElementById('task-timer').innerText = `00:${m}:${s}`;
+              document.getElementById('task-timer').innerText = `${h}:${m}:${s}`;
             }, 1000);
 
             checkBtn.onclick = () => {
