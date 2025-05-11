@@ -88,7 +88,13 @@
     }
   </style>
   <script>
+    var taskRecord = [];
+    var manuverList = [];
+    
+
     function startSecondPage() {
+      taskRecord = [];
+      manuverList = [];
       document.getElementById('page1').style.display = 'none';
       document.getElementById('page2').style.display = 'block';
       showSecondPage();
@@ -97,7 +103,6 @@
     let timerInterval;
     let timeElapsed = 0;
     let currentManuverIndex = 0;
-    let manuverList = [];
 
     function getRandomFromArray(arr) {
       return arr[Math.floor(Math.random() * arr.length)];
@@ -170,156 +175,8 @@
     }
 
     function showSecondPage() {
-      function generateMeth2x2() {
-        const valid = (n) => n >= 10 && !(n % 10 === 5 || n % 10 === 0);
-        let a, b;
-        do { a = Math.floor(Math.random() * 90) + 10; } while (!valid(a));
-        do { b = Math.floor(Math.random() * 90) + 10; } while (!valid(b));
-        return { question: `${a} × ${b}`, answer: a * b };
-      }
-
-      function generateMethAddSub() {
-        let a = Math.floor(Math.random() * 900) + 100;
-        let b;
-        do { b = Math.floor(Math.random() * 900) + 100; } while (a === b);
-        const op = Math.random() < 0.5 ? '+' : '-';
-        if (op === '-' && b > a) [a, b] = [b, a];
-        return { question: `${a} ${op} ${b}`, answer: op === '+' ? a + b : a - b };
-      }
-
-      function showMultiTaskQuestion(taskName) {
-        const group = document.querySelectorAll('#page2 .section')[1].querySelector('.group');
-        group.innerHTML = '';
-        const title = document.createElement('h5');
-        title.className = 'text-center';
-        let qa;
-        if (taskName === '2x2') qa = generateMeth2x2();
-        if (taskName === 'add-sub') qa = generateMethAddSub();
-        title.innerText = qa ? qa.question : 'N/A';
-        group.appendChild(title);
-      }
+      showMultiTaskSection();
       
-      const selectedTasks = Array.from(document.querySelectorAll('input[name="task"]:checked')).map(el => el.value);
-      const multitaskSection = document.querySelectorAll('#page2 .section')[1];
-      
-      if (selectedTasks.length === 0) {
-        multitaskSection.style.display = 'none';
-      } else {
-        multitaskSection.style.display = 'block';
-        const multiTaskGroup = multitaskSection.querySelector('.group');
-        multiTaskGroup.innerHTML = '';
-        const multiTimer = document.createElement('div');
-        multiTimer.className = 'text-center';
-        multiTimer.style.marginTop = '2rem';
-        multiTimer.innerHTML = '<span id="multi-timer" class="badge" style="background-color: var(--accent); font-size: 1.5rem;"></span>';
-        multiTaskGroup.appendChild(multiTimer);
-        //let multiCountdown = Math.floor(Math.random() * (200 - 30 + 1)) + 30;
-        let multiCountdown = Math.floor(Math.random() * (40 - 30 + 1)) + 30;
-        document.getElementById('multi-timer').innerText = multiCountdown;
-        const multiTimerInterval = setInterval(() => {
-          multiCountdown--;
-          if (multiCountdown >= 0) {
-            document.getElementById('multi-timer').innerText = multiCountdown;
-          } else {
-            clearInterval(multiTimerInterval);
-            multiTimer.remove();
-
-            const taskName = getRandomFromArray(selectedTasks);
-            const qa = taskName === '2x2' ? generateMeth2x2() : generateMethAddSub();
-
-            const title = document.createElement('h5');
-            title.className = 'text-center';
-            title.id = 'task-question';
-            title.innerText = qa.question;
-
-            const timerEl = document.createElement('span');
-            timerEl.className = 'badge bg-secondary';
-            timerEl.style.fontSize = '1.25rem';
-            timerEl.id = 'task-timer';
-            timerEl.innerText = '00:00:00';
-
-            const header = document.createElement('div');
-            header.className = 'd-flex justify-content-between';
-            header.appendChild(document.createElement('div'));
-            header.appendChild(timerEl);
-
-            const checkBtn = document.createElement('button');
-            checkBtn.className = 'btn btn-warning mt-3 w-100';
-            checkBtn.textContent = 'Check';
-
-            const result = document.createElement('div');
-            result.className = 'text-center mt-2';
-            result.id = 'task-answer';
-            result.style.display = 'none';
-            result.innerText = `Answer: ${qa.answer}`;
-
-            const rightBtn = document.createElement('button');
-            rightBtn.className = 'btn';
-            rightBtn.style.backgroundColor = 'var(--secondary)';
-            rightBtn.style.color = 'white';
-            rightBtn.textContent = 'Right';
-            rightBtn.style.display = 'none';
-
-            const wrongBtn = document.createElement('button');
-            wrongBtn.className = 'btn';
-            wrongBtn.style.backgroundColor = '#e57a2b';
-            wrongBtn.style.color = '#fff';
-            wrongBtn.textContent = 'Wrong';
-            wrongBtn.style.display = 'none';
-
-            const buttonRow = document.createElement('div');
-            buttonRow.className = 'd-flex justify-content-center gap-3 mt-2';
-            buttonRow.appendChild(wrongBtn);
-            buttonRow.appendChild(rightBtn);
-
-            let taskTime = 0;
-            const taskTimer = setInterval(() => {
-              taskTime++;
-              const m = String(Math.floor(taskTime / 60)).padStart(2, '0');
-              const s = String(taskTime % 60).padStart(2, '0');
-              document.getElementById('task-timer').innerText = `00:${m}:${s}`;
-            }, 1000);
-
-            checkBtn.onclick = () => {
-              clearInterval(taskTimer);
-              checkBtn.style.display = 'none';
-              result.style.display = 'block';
-              result.style.fontSize = '1.25rem';
-              rightBtn.style.display = 'inline-block';
-              wrongBtn.style.display = 'inline-block';
-            };
-
-            const taskRecord = [];
-            const completeTask = (correct) => {
-              taskRecord.push({
-                task: taskName,
-                question: qa.question,
-                answer: qa.answer,
-                duration: taskTime,
-                correct: correct
-              });
-              title.remove();
-              header.remove();
-              result.remove();
-              checkBtn.remove();
-              rightBtn.remove();
-              wrongBtn.remove();
-              buttonRow.remove();
-              showSecondPage();
-            };
-
-            rightBtn.onclick = () => completeTask(true);
-            wrongBtn.onclick = () => completeTask(false);
-
-            multiTaskGroup.appendChild(header);
-            multiTaskGroup.appendChild(title);
-            multiTaskGroup.appendChild(checkBtn);
-            multiTaskGroup.appendChild(result);
-            multiTaskGroup.appendChild(buttonRow);
-          }
-        }, 1000);
-        multitaskSection.style.display = 'block';
-      }
       const mode = document.querySelector('input[name="mode"]:checked').value;
       const difficulty = document.querySelector('input[name="difficulty"]:checked').value;
       manuverList = generateManuvers(difficulty, mode);
@@ -413,12 +270,158 @@
       }, 1000);
     }
 
-    function showManuverSection() {
-
-    }
-
     function showMultiTaskSection(){
+      function generateMeth2x2() {
+        const valid = (n) => n >= 11 && !(n % 10 === 5 || n % 10 === 0);
+        let a, b;
+        do { a = Math.floor(Math.random() * 90) + 10; } while (!valid(a));
+        do { b = Math.floor(Math.random() * 90) + 10; } while (!valid(b));
+        return { question: `${a} × ${b}`, answer: a * b };
+      }
+
+      function generateMethAddSub() {
+        let a = Math.floor(Math.random() * 900) + 100;
+        let b;
+        do { b = Math.floor(Math.random() * 900) + 100; } while (a === b);
+        const op = Math.random() < 0.5 ? '+' : '-';
+        if (op === '-' && b > a) [a, b] = [b, a];
+        return { question: `${a} ${op} ${b}`, answer: op === '+' ? a + b : a - b };
+      }
+
+      function showMultiTaskQuestion(taskName) {
+        const group = document.querySelectorAll('#page2 .section')[1].querySelector('.group');
+        group.innerHTML = '';
+        const title = document.createElement('h5');
+        title.className = 'text-center';
+        let qa;
+        if (taskName === '2x2') qa = generateMeth2x2();
+        if (taskName === 'add-sub') qa = generateMethAddSub();
+        title.innerText = qa ? qa.question : 'N/A';
+        group.appendChild(title);
+      }
+
+      const selectedTasks = Array.from(document.querySelectorAll('input[name="task"]:checked')).map(el => el.value);
+      const multitaskSection = document.querySelectorAll('#page2 .section')[1];
       
+      if (selectedTasks.length === 0) {
+        multitaskSection.style.display = 'none';
+      } 
+      else {
+        multitaskSection.style.display = 'block';
+        const multiTaskGroup = multitaskSection.querySelector('.group');
+        multiTaskGroup.innerHTML = '';
+        const multiTimer = document.createElement('div');
+        multiTimer.className = 'text-center';
+        multiTimer.style.marginTop = '2rem';
+        multiTimer.innerHTML = '<span id="multi-timer" class="badge" style="background-color: var(--accent); font-size: 1.5rem;"></span>';
+        multiTaskGroup.appendChild(multiTimer);
+        //let multiCountdown = Math.floor(Math.random() * (200 - 30 + 1)) + 30;
+        let multiCountdown = Math.floor(Math.random() * (40 - 30 + 1));
+        document.getElementById('multi-timer').innerText = multiCountdown;
+        const multiTimerInterval = setInterval(() => {
+          multiCountdown--;
+          if (multiCountdown >= 0) {
+            document.getElementById('multi-timer').innerText = multiCountdown;
+          } else {
+            clearInterval(multiTimerInterval);
+            multiTimer.remove();
+
+            const taskName = getRandomFromArray(selectedTasks);
+            const qa = taskName === '2x2' ? generateMeth2x2() : generateMethAddSub();
+
+            const title = document.createElement('h5');
+            title.className = 'text-center';
+            title.id = 'task-question';
+            title.innerText = qa.question;
+
+            const timerEl = document.createElement('span');
+            timerEl.className = 'badge bg-secondary';
+            timerEl.style.fontSize = '1.25rem';
+            timerEl.id = 'task-timer';
+            timerEl.innerText = '00:00:00';
+
+            const header = document.createElement('div');
+            header.className = 'd-flex justify-content-between';
+            header.appendChild(document.createElement('div'));
+            header.appendChild(timerEl);
+
+            const checkBtn = document.createElement('button');
+            checkBtn.className = 'btn btn-warning mt-3 w-100';
+            checkBtn.textContent = 'Check';
+
+            const result = document.createElement('div');
+            result.className = 'text-center mt-2';
+            result.id = 'task-answer';
+            result.style.display = 'none';
+            result.innerText = `Answer: ${qa.answer}`;
+
+            const rightBtn = document.createElement('button');
+            rightBtn.className = 'btn';
+            rightBtn.style.backgroundColor = 'var(--secondary)';
+            rightBtn.style.color = 'white';
+            rightBtn.textContent = 'Right';
+            rightBtn.style.display = 'none';
+
+            const wrongBtn = document.createElement('button');
+            wrongBtn.className = 'btn';
+            wrongBtn.style.backgroundColor = '#e57a2b';
+            wrongBtn.style.color = '#fff';
+            wrongBtn.textContent = 'Wrong';
+            wrongBtn.style.display = 'none';
+
+            const buttonRow = document.createElement('div');
+            buttonRow.className = 'd-flex justify-content-center gap-3 mt-2';
+            buttonRow.appendChild(wrongBtn);
+            buttonRow.appendChild(rightBtn);
+
+            let taskTime = 0;
+            const taskTimer = setInterval(() => {
+              taskTime++;
+              const m = String(Math.floor(taskTime / 60)).padStart(2, '0');
+              const s = String(taskTime % 60).padStart(2, '0');
+              document.getElementById('task-timer').innerText = `00:${m}:${s}`;
+            }, 1000);
+
+            checkBtn.onclick = () => {
+              clearInterval(taskTimer);
+              checkBtn.style.display = 'none';
+              result.style.display = 'block';
+              result.style.fontSize = '1.25rem';
+              rightBtn.style.display = 'inline-block';
+              wrongBtn.style.display = 'inline-block';
+            };
+
+            
+            const completeTask = (correct) => {
+              taskRecord.push({
+                task: taskName,
+                question: qa.question,
+                answer: qa.answer,
+                duration: taskTime,
+                correct: correct
+              });
+              title.remove();
+              header.remove();
+              result.remove();
+              checkBtn.remove();
+              rightBtn.remove();
+              wrongBtn.remove();
+              buttonRow.remove();
+              showMultiTaskSection();
+            };
+
+            rightBtn.onclick = () => completeTask(true);
+            wrongBtn.onclick = () => completeTask(false);
+
+            multiTaskGroup.appendChild(header);
+            multiTaskGroup.appendChild(title);
+            multiTaskGroup.appendChild(checkBtn);
+            multiTaskGroup.appendChild(result);
+            multiTaskGroup.appendChild(buttonRow);
+          }
+        }, 1000);
+        multitaskSection.style.display = 'block';
+      }
     }
 
     function stopTimer() {
