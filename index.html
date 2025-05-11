@@ -336,15 +336,18 @@
       };
     }
 
+      function generateQuestion(taskName) {
+        if (taskName === '2x2') return generateMeth2x2();
+        if (taskName === 'add-sub') return generateMethAddSub();
+        if (taskName === 'unit-change') return generateMethUnitChange();
+      }
+
       function showMultiTaskQuestion(taskName) {
         const group = document.querySelectorAll('#page2 .section')[1].querySelector('.group');
         group.innerHTML = '';
         const title = document.createElement('h5');
         title.className = 'text-center';
-        let qa;
-        if (taskName === 'meth-2x2') qa = generateMeth2x2();
-        if (taskName === 'meth-add-sub') qa = generateMethAddSub();
-        if (taskName === 'meth-unit-change') qa = generateMethUnitChange();
+        let qa = generateQuestion(taskName);
         title.innerText = qa ? qa.question : 'N/A';
         group.appendChild(title);
       }
@@ -378,9 +381,7 @@
             multiTimer.remove();
 
             const taskName = getRandomFromArray(selectedTasks);
-            if (taskName === 'meth-2x2') qa = generateMeth2x2();
-            if (taskName === 'meth-add-sub') qa = generateMethAddSub();
-            if (taskName === 'meth-unit-change') qa = generateMethUnitChange();
+            qa = generateQuestion(taskName);
 
             const title = document.createElement('h5');
             title.className = 'text-center';
@@ -565,16 +566,16 @@
         <h2>Multi-tasking</h2>
         <div class="group">
           <div class="form-check">
-            <input class="form-check-input" type="checkbox" name="task" value="meth-2x2" id="meth-2x2" checked>
-            <label class="form-check-label" for="meth-2x2">Meth 2*2</label>
+            <input class="form-check-input" type="checkbox" name="task" value="2x2" id="2x2" checked>
+            <label class="form-check-label" for="2x2">Meth 2*2</label>
           </div>
           <div class="form-check">
-            <input class="form-check-input" type="checkbox" name="task" value="meth-unit-change" id="meth-unit-change">
-            <label class="form-check-label" for="meth-unit-change">Meth Unit Change</label>
+            <input class="form-check-input" type="checkbox" name="task" value="unit-change" id="unit-change">
+            <label class="form-check-label" for="unit-change">Meth Unit Change</label>
           </div>
           <div class="form-check">
-            <input class="form-check-input" type="checkbox" name="task" value="meth-add-sub" id="meth-add-sub" checked>
-            <label class="form-check-label" for="meth-add-sub">Meth Add/Sub</label>
+            <input class="form-check-input" type="checkbox" name="task" value="add-sub" id="add-sub" checked>
+            <label class="form-check-label" for="add-sub">Meth Add/Sub</label>
           </div>
           <div class="form-check">
             <input class="form-check-input" type="checkbox" name="task" value="timezone-conversion" id="timezone-conversion">
