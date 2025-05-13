@@ -138,18 +138,19 @@
       function createTurn() {
         const dir = getRandomFromArray(['left', 'right']);
         const bank = getRandomFromArray([20, 25, 30, 35, 40, 45]);
+        let degree = 60 + Math.floor(Math.random() * 61) * 5;
         do {
-          const degree = 60 + Math.floor(Math.random() * 61) * 5;
+          degree = 60 + Math.floor(Math.random() * 61) * 5;
         } while (bank * 2 >= degree)
         return `Turn ${dir} ${degree}° from current HDG with ${bank}° bank`;
       }
 
       function createAltitude() {
         const dir = getRandomFromArray(['Climb', 'Descent']);
-        
+        let alt = 5000 + Math.floor(Math.random() * 31) * 500;
         const vsi = 1000 + Math.floor(Math.random() * 5) * 500;
         do {
-          const alt = 5000 + Math.floor(Math.random() * 31) * 500;
+          alt = 5000 + Math.floor(Math.random() * 31) * 500;
         } while (vsi * 5 >= alt)
         return `${dir} ${alt}' from current ALT with VSI ${vsi}`;
       }
