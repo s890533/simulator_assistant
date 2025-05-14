@@ -137,7 +137,7 @@
 
       function createTurn() {
         const dir = getRandomFromArray(['left', 'right']);
-        const bank = getRandomFromArray([20, 25, 30, 35, 40, 45]);
+        const bank = getRandomFromArray([20, 20, 20, 20, 20, 30, 30, 30, 30, 45]);
         let degree = 60 + Math.floor(Math.random() * 61) * 5;
         do {
           degree = 60 + Math.floor(Math.random() * 61) * 5;
@@ -148,10 +148,10 @@
       function createAltitude() {
         const dir = getRandomFromArray(['Climb', 'Descent']);
         let alt = 5000 + Math.floor(Math.random() * 31) * 500;
-        const vsi = 1000 + Math.floor(Math.random() * 5) * 500;
+        const vsi = 1000 + Math.floor(Math.random() * 5) * 500; //1000~3000
         do {
-          alt = 5000 + Math.floor(Math.random() * 31) * 500;
-        } while (vsi * 5 >= alt)
+          alt = 1500 + Math.floor(Math.random() * 18) * 500; //1500~10000
+        } while (vsi >= alt)
         return `${dir} ${alt}' from current ALT with VSI ${vsi}`;
       }
 
