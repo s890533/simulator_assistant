@@ -121,11 +121,11 @@
     function generateManuvers(difficulty, mode) {
       let countRange;
       switch (difficulty) {
-        case 'easy': countRange = [2, 4]; break;
-        case 'mid': countRange = [4, 6]; break;
-        case 'hard': countRange = [6, 8]; break;
-        case 'extreme': countRange = [6, 8]; break;
-        default: countRange = [2, 4];
+        case 'easy': countRange = [2, 3]; break;
+        case 'mid': countRange = [3, 5]; break;
+        case 'hard': countRange = [5, 6]; break;
+        case 'extreme': countRange = [5, 8]; break;
+        default: countRange = [2, 5];
       }
       const count = Math.floor(Math.random() * (countRange[1] - countRange[0] + 1)) + countRange[0];
       const manuvers = [];
@@ -234,7 +234,7 @@
         timerDisplay.innerHTML = '<span class="badge" style="background-color: var(--accent); font-size: 1.25rem;">30</span>';
         manuverGroup.prepend(timerDisplay);
 
-        let countdown = 30;
+        let countdown = Math.max(30, manuverList.length * 6 + 6);
         const memoryCountdown = setInterval(() => {
           countdown--;
           timerDisplay.querySelector('span').innerText = countdown;
