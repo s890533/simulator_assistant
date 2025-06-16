@@ -45,7 +45,8 @@
     }
 
     .group p {
-      font-size: 1rem;
+      font-size: 1.3rem;
+      font-weight:bold;
       display: block;
       justify-content: unset;
       align-items: unset;
@@ -94,6 +95,15 @@
     /* Ensure third page manuver text is centered */
     #manuver-summary p {
       text-align: center;
+    }
+
+    .version-info {
+      position: fixed;
+      right: 10px;
+      bottom: 10px;
+      font-size: 12px;
+      color: #888;
+      z-index: 1000;
     }
   </style>
   <script>
@@ -476,7 +486,7 @@
       function showMultiTaskQuestion(taskName) {
         const group = document.querySelectorAll('#page2 .section')[1].querySelector('.group');
         group.innerHTML = '';
-        const title = document.createElement('h5');
+        const title = document.createElement('h4');
         title.className = 'text-center';
         let qa = generateQuestion(taskName);
         title.innerText = qa ? qa.question : 'N/A';
@@ -514,7 +524,7 @@
             const taskName = getRandomFromArray(selectedTasks);
             qa = generateQuestion(taskName);
 
-            const title = document.createElement('h5');
+            const title = document.createElement('h4');
             title.className = 'text-center';
             title.id = 'task-question';
             title.innerText = qa.question;
@@ -790,7 +800,7 @@
     </div>
   </div>
 
-  
+  <div class="version-info">ver. 2025061601</div>
 
 </body>
 </html>
